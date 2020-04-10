@@ -107,37 +107,11 @@ void main(void)
             }
             else if(procs[i].pid > 0)
             {
-                // TODO: Check pid status
+                // TODO: Check pid status; if finished, set procs[i].status = 0
             }
         }
 
     } while(!check_finished(procs, num_procs));
-    // for(int k=0;k<5;k++)
-    // {
-    //     pid = fork();
-    //     switch (pid)
-    //     {
-    //         case 0:
-    //             for (i = 1; i <= MAX_COUNT; i++) {
-    //                 sprintf(buf, "This line is from child pid %d, value = %d\n", getpid(), i);
-    //                 write(1, buf, strlen(buf));
-    //             }
-    //             exit(0);
-    //             break;
-            
-    //         default:
-    //             for (i = 1; i <= MAX_COUNT; i++) {
-    //                 sprintf(buf, "This line is from pid %d, value = %d\n", getpid(), i);
-    //                 write(1, buf, strlen(buf));
-    //             }
-    //             break;
-    //     }
-    // }
-    // wait(NULL);
 
-    // if(pid > 0)
-    // {
-    //     printf("Parent ends.\n");
-    // }
     return;
 }
