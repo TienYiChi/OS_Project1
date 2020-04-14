@@ -4,6 +4,8 @@
 #include <unistd.h>
 #include <sys/time.h>
 #include <sys/wait.h>
+#include <sys/types.h>
+#include <signal.h>
 
 #define MAX_COUNT 50
 #define BUF_SIZE 100
@@ -23,7 +25,7 @@ int check_finished(PROC_INFO* procs, int len)
 {
     int finished = 1;
     for(int i = 0; i < len; i++) {
-        finished *= procs->status;
+        finished *= procs[i].status;
     }
 
     return finished;
@@ -31,7 +33,7 @@ int check_finished(PROC_INFO* procs, int len)
 
 void main(void)
 {
-    int    num_procs;
+    int    num_procs, status;
     char   buf[BUF_SIZE];
     char   policy[10];
     for(int i = 0; i < 20; i++) {
@@ -50,33 +52,34 @@ void main(void)
     }
 
     struct timeval te, ts;
+
     gettimeofday(&ts, NULL);
-    long long mts = ts.tv_sec*1000LL + ts.tv_usec/1000;
     {
         volatile unsigned long j; 
-        for(int k=0;k<500;k++)
-        {
-            for(j=0;j<1000000UL;j++);
-        }
+        for(j=0;j<1000000UL;j++);
     }
-    gettimeofday(&te, NULL); // get current time
+    gettimeofday(&te, NULL);
+
+    long long mts = ts.tv_sec*1000LL + ts.tv_usec/1000;
     long long mte = te.tv_sec*1000LL + te.tv_usec/1000;
     long long ll_t_quantum = mte - mts;
+    unsigned int t_sleep = (unsigned int)ll_t_quantum;
     fflush(stdout);
     
     struct timeval ts_main;
     gettimeofday(&ts_main, NULL);
-    long long ll_tsm = ts_main.tv_sec*1000LL + ts_main.tv_usec/1000;
-    long long ll_ts = ll_tsm;
+    long long ll_t_current = ts_main.tv_sec*1000LL + ts_main.tv_usec/1000;
+    long long ll_t_start = ll_t_current;
     long long num_quantum = 0;
     long long old_num_quantum = 0;
 
     do {
         gettimeofday(&ts_main, NULL);
-        ll_tsm = ts_main.tv_sec*1000LL + ts_main.tv_usec/1000;
-        num_quantum = (ll_tsm - ll_ts) / ll_t_quantum;
+        ll_t_current = ts_main.tv_sec*1000LL + ts_main.tv_usec/1000;
+        num_quantum = (ll_t_current - ll_t_start) / ll_t_quantum;
+        printf("Old Q: %lld, Q: %lld\n", old_num_quantum, num_quantum);
         for(int i = 0; i < num_procs; i++) {
-            if(procs[i].pid < 0 && old_num_quantum < procs[i].t_start && num_quantum > procs[i].t_start) {
+            if(procs[i].pid < 0 && old_num_quantum <= procs[i].t_start && num_quantum >= procs[i].t_start) {
                 pid_t pid = fork();
                 switch (pid) {
                     case 0:
@@ -96,9 +99,19 @@ void main(void)
                         break;
                 }
             } else if(procs[i].pid > 0) {
-                // TODO: Check pid status; if finished, set procs[i].status = 0
+                printf("Child: %d\n", procs[i].pid);
+                // Check pid status; if finished, set procs[i].status = 1
+                if(kill(procs[i].pid, 0) == 0) {
+                    continue;
+                } else {
+                    printf("Child: %d finished.\n", procs[i].pid);
+                    procs[i].status = 1;
+                }
             }
         }
+        old_num_quantum = num_quantum;
+        waitpid(-1, &status, WNOHANG);
+        usleep(t_sleep*1000);
     } while(!check_finished(procs, num_procs));
 
     return;
