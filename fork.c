@@ -5,7 +5,9 @@
 #include <sys/time.h>
 #include <sys/wait.h>
 #include <sys/types.h>
+#include <sys/syscall.h>
 #include <signal.h>
+#include "sched_algo.h"
 
 #define MAX_COUNT 50
 #define BUF_SIZE 100
@@ -77,13 +79,12 @@ void main(void)
         gettimeofday(&ts_main, NULL);
         ll_t_current = ts_main.tv_sec*1000LL + ts_main.tv_usec/1000;
         num_quantum = (ll_t_current - ll_t_start) / ll_t_quantum;
-        printf("Old Q: %lld, Q: %lld\n", old_num_quantum, num_quantum);
         for(int i = 0; i < num_procs; i++) {
             if(procs[i].pid < 0 && old_num_quantum <= procs[i].t_start && num_quantum >= procs[i].t_start) {
                 pid_t pid = fork();
                 switch (pid) {
                     case 0:
-                        // TODO: sys call and use printk
+                        printf("%s %d\n", procs[i].name, getpid());
                         {
                             volatile unsigned long j, k;
                             for(k=0;k<procs[i].t_exec;k++) {
@@ -91,6 +92,7 @@ void main(void)
                             }
                         }
                         // TODO: sys call and use printk
+                        // syscall(333, getpid())
                         exit(0);
                         break;
                     
