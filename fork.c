@@ -116,6 +116,7 @@ void main(void)
                             volatile unsigned long j, k;
                             for(k=0;k<procs[i].t_exec;k++) {
                                 for(j=0;j<1000000UL;j++);
+                                printf("%s is running.\n", procs[i].name);
                             }
                         }
                         // TODO: sys call and use printk
