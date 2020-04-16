@@ -11,6 +11,8 @@ typedef struct proc_info
     int t_exec;
     int t_remain;
     int order;
-    int status;
+    int rr_pri;
+    int finish;
 } PROC_INFO;
+
 #endif
