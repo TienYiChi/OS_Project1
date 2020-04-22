@@ -1,6 +1,5 @@
 CC=gcc
 CFLAGS=-I.
-DEPS = main.h
 
 %.o: %.c $(DEPS)
 	$(CC) -c -o $@ $< $(CFLAGS)

@@ -109,7 +109,6 @@ void main(void)
                 pid_t pid = fork();
                 switch (pid) {
                     case 0: {
-                        // printf("%s %d\n", procs[i].name, getpid());
                         cpu_set_t mask;
                         CPU_ZERO(&mask);
                         CPU_SET(0, &mask);
@@ -153,9 +152,8 @@ void main(void)
         }
 
         // RR re-schedule every 500 units.
-        if(old_units < units && num_done < num_procs) {
+        if((policy[0] != 'S' || policy[0] != 'P') && old_units < units && num_done < num_procs) {
             raise = (*run_sched)(procs, num_procs, units);
-            print_rr_pri(procs, num_procs);
             old_units = units;
         }
 
