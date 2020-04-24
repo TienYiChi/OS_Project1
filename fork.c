@@ -140,7 +140,7 @@ void main(void)
                         procs[i].rr_pri = 1;
                         num_arrived -= 1;
                         raise = (*run_sched)(procs, num_procs, last_exec, new_exec);
-                        printf("Old start %d, new start: %d\n", last_exec, new_exec);
+                        printf("new start: %d\n", new_exec);
                         fflush(stdout);
                         last_exec = new_exec;
                         break;
@@ -154,7 +154,7 @@ void main(void)
                         procs[i].finish = 1;
                         // Re-schedule whenever someone is finished.
                         raise = (*run_sched)(procs, num_procs, last_exec, new_exec);
-                        printf("Old start %d, new start: %d\n", last_exec, new_exec);
+                        printf("new start: %d\n", new_exec);
                         fflush(stdout);
                         last_exec = new_exec;
                         num_done += 1;

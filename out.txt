@@ -1,0 +1,42 @@
+Policy: SJF
+Number of processes: 8
+P1: 2, t_remain: 3000 | 
+new start: 101
+P1: 2, t_remain: 3000 | P2: 1, t_remain: 5000 | 
+new start: 101
+P1: 2, t_remain: 3000 | P2: 1, t_remain: 5000 | P3: 1, t_remain: 7000 | 
+new start: 101
+P1: 2, t_remain: 3000 | P2: 1, t_remain: 5000 | P3: 1, t_remain: 7000 | P4: 1, t_remain: 10 | 
+new start: 200
+P1: 2, t_remain: 3000 | P2: 1, t_remain: 5000 | P3: 1, t_remain: 7000 | P4: 1, t_remain: 10 | P5: 1, t_remain: 10 | 
+new start: 200
+P1: 2, t_remain: 3000 | P2: 1, t_remain: 5000 | P3: 1, t_remain: 7000 | P4: 1, t_remain: 10 | P5: 1, t_remain: 10 | P6: 1, t_remain: 4000 | 
+new start: 300
+P1: 2, t_remain: 3000 | P2: 1, t_remain: 5000 | P3: 1, t_remain: 7000 | P4: 1, t_remain: 10 | P5: 1, t_remain: 10 | P6: 1, t_remain: 4000 | P7: 1, t_remain: 4000 | 
+new start: 400
+P1: 2, t_remain: 3000 | P2: 1, t_remain: 5000 | P3: 1, t_remain: 7000 | P4: 1, t_remain: 10 | P5: 1, t_remain: 10 | P6: 1, t_remain: 4000 | P7: 1, t_remain: 4000 | P8: 1, t_remain: 9000 | 
+new start: 500
+P1 is finished.
+P2: 1, t_remain: 5000 | P3: 1, t_remain: 7000 | P4: 2, t_remain: 10 | P5: 1, t_remain: 10 | P6: 1, t_remain: 4000 | P7: 1, t_remain: 4000 | P8: 1, t_remain: 9000 | 
+new start: 1949
+P4 is finished.
+P2: 1, t_remain: 5000 | P3: 1, t_remain: 7000 | P5: 2, t_remain: 10 | P6: 1, t_remain: 4000 | P7: 1, t_remain: 4000 | P8: 1, t_remain: 9000 | 
+new start: 1956
+P5 is finished.
+P2: 1, t_remain: 5000 | P3: 1, t_remain: 7000 | P6: 2, t_remain: 4000 | P7: 1, t_remain: 4000 | P8: 1, t_remain: 9000 | 
+new start: 1964
+P6 is finished.
+P2: 1, t_remain: 5000 | P3: 1, t_remain: 7000 | P7: 2, t_remain: 4000 | P8: 1, t_remain: 9000 | 
+new start: 4421
+P7 is finished.
+P2: 2, t_remain: 5000 | P3: 1, t_remain: 7000 | P8: 1, t_remain: 9000 | 
+new start: 6847
+P2 is finished.
+P3: 2, t_remain: 7000 | P8: 1, t_remain: 9000 | 
+new start: 9872
+P3 is finished.
+P8: 2, t_remain: 9000 | 
+new start: 14129
+P8 is finished.
+
+new start: 19570

@@ -125,7 +125,69 @@ int PSJF(PROC_INFO *procs, int len, ...)
 
 int SJF(PROC_INFO *procs, int len, ...)
 {
-    printf("Running %s...\n", __func__);
+    // printf("Running %s...\n", __func__);
+    int running = -1;
+    int set = 0;
+    int min_exec = 0;
+    struct sched_param param = { .sched_priority = 1 };
+
+    // Check who is running right now
+    for(int i = 0; i < len; i++) {
+        if(procs[i].pid > 0 && procs[i].finish == 0) {
+            sched_getparam(procs[i].pid, &param);
+            if(param.sched_priority == 2) {
+                running = i;
+                break;
+            }
+        }
+    }
+
+    // Priority re-ordering
+    for(int i = 0; i < len; i++) {
+        if(procs[i].pid > 0 && procs[i].finish == 0) {
+            if(min_exec == 0) {
+                min_exec = procs[i].t_exec;
+            }
+            // Skip the one that is already running
+            if(i != running && min_exec > procs[i].t_exec) {
+                min_exec = procs[i].t_exec;
+            }
+        }
+    }
+
+    // One with max priority scheduled
+    for(int i = 0; i < len; i++) {
+        if(procs[i].pid > 0 && procs[i].finish == 0) {
+            if(running >= 0) {
+                if(i == running) {
+                    param.sched_priority = 2;
+                    if (sched_setscheduler(procs[i].pid, SCHED_FIFO, &param) != 0) {
+                        perror("sched_setscheduler2");
+                    }
+                } else {
+                    param.sched_priority = 1;
+                    if (sched_setscheduler(procs[i].pid, SCHED_FIFO, &param) != 0) {
+                        perror("sched_setscheduler3");
+                    }
+                }
+            } else {
+                if(min_exec == procs[i].t_exec && set == 0) {
+                    param.sched_priority = 2;
+                    if (sched_setscheduler(procs[i].pid, SCHED_FIFO, &param) != 0) {
+                        perror("sched_setscheduler2");
+                    }
+                    set = 1;
+                } else {
+                    param.sched_priority = 1;
+                    if (sched_setscheduler(procs[i].pid, SCHED_FIFO, &param) != 0) {
+                        perror("sched_setscheduler3");
+                    }
+                }
+            }
+        }
+    }
+    print_pri(procs, len);
+    return min_exec;
 };
 
 void print_pri(PROC_INFO *procs, int len)
