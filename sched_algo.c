@@ -1,8 +1,9 @@
 #include <stdio.h>
 #include <sched.h>
+#include <stdarg.h>
 #include "sched_algo.h"
 
-int FIFO(PROC_INFO *procs, int len, int q_num)
+int FIFO(PROC_INFO *procs, int len, ...)
 {
     // printf("Running %s...\n", __func__);
     struct sched_param param;
@@ -15,7 +16,7 @@ int FIFO(PROC_INFO *procs, int len, int q_num)
     return 0;
 };
 
-int RR(PROC_INFO *procs, int len, int q_num)
+int RR(PROC_INFO *procs, int len, ...)
 {
     // printf("Running %s...\n", __func__);
     int raise = -1;
@@ -66,13 +67,30 @@ int RR(PROC_INFO *procs, int len, int q_num)
     return raise;
 };
 
-int PSJF(PROC_INFO *procs, int len, int q_num)
+int PSJF(PROC_INFO *procs, int len, ...)
 {
     // printf("Running %s...\n", __func__);
-    int pri_level = 1;
-    int max_level = 1;
+    va_list argp;
+    va_start(argp, len);
+    int q_begin = va_arg(argp, int);
+    int q_end = va_arg(argp, int);
+
+    int set = 0;
     int min_exec = 0;
     struct sched_param param = { .sched_priority = 1 };
+
+    // Check who is running right now
+    for(int i = 0; i < len; i++) {
+        if(procs[i].pid > 0 && procs[i].finish == 0) {
+            sched_getparam(procs[i].pid, &param);
+            if(param.sched_priority == 2) {
+                procs[i].t_remain -= (q_end - q_begin);
+                break;
+            }
+        }
+    }
+
+    // Priority re-ordering
     for(int i = 0; i < len; i++) {
         if(procs[i].pid > 0 && procs[i].finish == 0) {
             if(min_exec == 0) {
@@ -80,22 +98,19 @@ int PSJF(PROC_INFO *procs, int len, int q_num)
             }
             if(min_exec > procs[i].t_remain) {
                 min_exec = procs[i].t_remain;
-                pri_level += 1;
-                max_level = pri_level+1;
-                procs[i].order = max_level;
-            } else {
-                procs[i].order = pri_level;
             }
         }
     }
 
+    // One with max priority scheduled
     for(int i = 0; i < len; i++) {
         if(procs[i].pid > 0 && procs[i].finish == 0) {
-            if(procs[i].order == max_level) {
+            if(procs[i].t_remain == min_exec && set == 0) {
                 param.sched_priority = 2;
                 if (sched_setscheduler(procs[i].pid, SCHED_FIFO, &param) != 0) {
                     perror("sched_setscheduler2");
                 }
+                set = 1;
             } else {
                 param.sched_priority = 1;
                 if (sched_setscheduler(procs[i].pid, SCHED_FIFO, &param) != 0) {
@@ -108,7 +123,7 @@ int PSJF(PROC_INFO *procs, int len, int q_num)
     return min_exec;
 };
 
-int SJF(PROC_INFO *procs, int len, int q_num)
+int SJF(PROC_INFO *procs, int len, ...)
 {
     printf("Running %s...\n", __func__);
 };
@@ -119,8 +134,9 @@ void print_pri(PROC_INFO *procs, int len)
     for(int i = 0; i < len; i++) {
         if(procs[i].pid > 0 && procs[i].finish == 0) {
             sched_getparam(procs[i].pid, &param);
-            printf("%s: %d | ", procs[i].name, param.sched_priority);
+            printf("%s: %d, t_remain: %d | ", procs[i].name, param.sched_priority, procs[i].t_remain);
         }
     }
     printf("\n");
+    fflush(stdout);
 };

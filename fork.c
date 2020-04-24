@@ -35,7 +35,7 @@ void main(void)
 
     int    num_procs, status, raise;
     char   policy[10];
-    int   (*run_sched)(PROC_INFO*, int, int);
+    int   (*run_sched)(PROC_INFO*, int, ...);
 
     scanf("%s", policy);
     scanf("%d", &num_procs);
@@ -96,12 +96,18 @@ void main(void)
     int num_done = 0;
     long long old_num_quantum = 0;
     long long num_quantum = 0;
+    // For RR
     int old_units = 0;
     int units = 0;
+    // For PSJF
+    int last_exec = 0;
+    int new_exec = 0;
+
     do {
         gettimeofday(&ts_main, NULL);
         ll_t_current = ts_main.tv_sec*1000LL + ts_main.tv_usec/1000;
         num_quantum = (ll_t_current - ll_t_start) / ll_t_quantum;
+        new_exec = num_quantum;
         units = num_quantum / 500;
         
         for(int i = 0; i < num_procs; i++) {
@@ -133,7 +139,10 @@ void main(void)
                         procs[i].order = num_arrived;
                         procs[i].rr_pri = 1;
                         num_arrived -= 1;
-                        raise = (*run_sched)(procs, num_procs, units);
+                        raise = (*run_sched)(procs, num_procs, last_exec, new_exec);
+                        printf("Old start %d, new start: %d\n", last_exec, new_exec);
+                        fflush(stdout);
+                        last_exec = new_exec;
                         break;
                 }
             } else if(procs[i].pid > 0) {
@@ -144,7 +153,10 @@ void main(void)
                     if(procs[i].finish == 0 && num_done < num_procs) {
                         procs[i].finish = 1;
                         // Re-schedule whenever someone is finished.
-                        raise = (*run_sched)(procs, num_procs, units);
+                        raise = (*run_sched)(procs, num_procs, last_exec, new_exec);
+                        printf("Old start %d, new start: %d\n", last_exec, new_exec);
+                        fflush(stdout);
+                        last_exec = new_exec;
                         num_done += 1;
                     }
                 }
@@ -152,13 +164,12 @@ void main(void)
         }
 
         // RR re-schedule every 500 units.
-        if((policy[0] != 'S' || policy[0] != 'P') && old_units < units && num_done < num_procs) {
-            raise = (*run_sched)(procs, num_procs, units);
+        if((policy[0] == 'R') && old_units < units && num_done < num_procs) {
+            raise = (*run_sched)(procs, num_procs);
             old_units = units;
         }
 
         old_num_quantum = num_quantum;
-        fflush(stdout);
         usleep(t_sleep*1000);
 
     } while(!check_finished(procs, num_procs));
