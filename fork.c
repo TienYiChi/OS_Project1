@@ -134,7 +134,7 @@ void main(void)
                         }
                         clock_gettime(CLOCK_REALTIME, &clock_end);
                         // TODO: sys call and use printk
-                        syscall(333, "Project1", getpid(), clock_start.tv_nsec, clock_end.tv_nsec);
+                        syscall(333, "Project1", getpid(), clock_start, clock_end);
                         exit(0);
                         break;
                     }
