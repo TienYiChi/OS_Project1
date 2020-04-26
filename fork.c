@@ -1,13 +1,14 @@
 #define _GNU_SOURCE
 #include <stdio.h>
 #include <stdlib.h>
-#include <unistd.h>
 #include <sched.h>
+#include <signal.h>
+#include <time.h>
+#include <unistd.h>
 #include <sys/time.h>
 #include <sys/wait.h>
 #include <sys/types.h>
 #include <sys/syscall.h>
-#include <signal.h>
 #include "proc_info.h"
 #include "sched_algo.h"
 
@@ -39,8 +40,8 @@ void main(void)
 
     scanf("%s", policy);
     scanf("%d", &num_procs);
-    printf("Policy: %s\n", policy);
-    printf("Number of processes: %d\n", num_procs);
+    // printf("Policy: %s\n", policy);
+    // printf("Number of processes: %d\n", num_procs);
     fflush(stdout);
 
     PROC_INFO* procs = malloc(num_procs*sizeof(PROC_INFO));
@@ -103,6 +104,8 @@ void main(void)
     int last_exec = 0;
     int new_exec = 0;
 
+    struct timespec clock_start, clock_end;
+
     do {
         gettimeofday(&ts_main, NULL);
         ll_t_current = ts_main.tv_sec*1000LL + ts_main.tv_usec/1000;
@@ -115,6 +118,7 @@ void main(void)
                 pid_t pid = fork();
                 switch (pid) {
                     case 0: {
+                        clock_gettime(CLOCK_REALTIME, &clock_start);
                         cpu_set_t mask;
                         CPU_ZERO(&mask);
                         CPU_SET(0, &mask);
@@ -128,9 +132,9 @@ void main(void)
                                 for(j=0;j<1000000UL;j++);
                             }
                         }
+                        clock_gettime(CLOCK_REALTIME, &clock_end);
                         // TODO: sys call and use printk
-                        // syscall(333, getpid())
-                        printf("%s is finished.\n", procs[i].name);
+                        syscall(333, "Project1", getpid(), clock_start.tv_nsec, clock_end.tv_nsec);
                         exit(0);
                         break;
                     }
@@ -140,7 +144,7 @@ void main(void)
                         procs[i].rr_pri = 1;
                         num_arrived -= 1;
                         raise = (*run_sched)(procs, num_procs, last_exec, new_exec);
-                        printf("new start: %d\n", new_exec);
+                        printf("%s %d\n", procs[i].name, procs[i].pid);
                         fflush(stdout);
                         last_exec = new_exec;
                         break;
@@ -154,8 +158,6 @@ void main(void)
                         procs[i].finish = 1;
                         // Re-schedule whenever someone is finished.
                         raise = (*run_sched)(procs, num_procs, last_exec, new_exec);
-                        printf("new start: %d\n", new_exec);
-                        fflush(stdout);
                         last_exec = new_exec;
                         num_done += 1;
                     }

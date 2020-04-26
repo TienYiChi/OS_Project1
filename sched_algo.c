@@ -63,7 +63,7 @@ int RR(PROC_INFO *procs, int len, ...)
         raise = head;
     }
 
-    print_pri(procs, len);
+    // print_pri(procs, len);
     return raise;
 };
 
@@ -119,7 +119,7 @@ int PSJF(PROC_INFO *procs, int len, ...)
             }
         }
     }
-    print_pri(procs, len);
+    // print_pri(procs, len);
     return min_exec;
 };
 
@@ -186,7 +186,7 @@ int SJF(PROC_INFO *procs, int len, ...)
             }
         }
     }
-    print_pri(procs, len);
+    // print_pri(procs, len);
     return min_exec;
 };
 
