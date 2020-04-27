@@ -32,7 +32,7 @@ void main(void)
         exit(1);
     }
     param.sched_priority = max_priority;
-    sched_setscheduler(0, SCHED_FIFO, &param);
+    sched_setscheduler(getpid(), SCHED_FIFO, &param);
 
     int    num_procs, status, raise;
     char   policy[10];
@@ -133,8 +133,8 @@ void main(void)
                             }
                         }
                         clock_gettime(CLOCK_REALTIME, &clock_end);
-                        // TODO: sys call and use printk
-                        syscall(333, "Project1", getpid(), clock_start, clock_end);
+                        syscall(333, "[Project1]", getpid(), clock_start, clock_end);
+						printf("%d %ld.%ld %ld.%ld\n", getpid(), clock_start.tv_sec, clock_start.tv_nsec, clock_end.tv_sec, clock_end.tv_nsec);
                         exit(0);
                         break;
                     }
@@ -144,8 +144,6 @@ void main(void)
                         procs[i].rr_pri = 1;
                         num_arrived -= 1;
                         raise = (*run_sched)(procs, num_procs, last_exec, new_exec);
-                        printf("%s %d\n", procs[i].name, procs[i].pid);
-                        fflush(stdout);
                         last_exec = new_exec;
                         break;
                 }
