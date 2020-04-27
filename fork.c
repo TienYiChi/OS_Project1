@@ -134,7 +134,6 @@ void main(void)
                         }
                         clock_gettime(CLOCK_REALTIME, &clock_end);
                         syscall(333, "[Project1]", getpid(), clock_start, clock_end);
-						printf("%d %ld.%ld %ld.%ld\n", getpid(), clock_start.tv_sec, clock_start.tv_nsec, clock_end.tv_sec, clock_end.tv_nsec);
                         exit(0);
                         break;
                     }
