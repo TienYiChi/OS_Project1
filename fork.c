@@ -133,7 +133,7 @@ void main(void)
                             }
                         }
                         clock_gettime(CLOCK_REALTIME, &clock_end);
-                        syscall(333, "[Project1]", getpid(), clock_start, clock_end);
+                        syscall(333, "[Project1]", getpid(), clock_start.tv_sec, clock_start.tv_nsec, clock_end.tv_sec, clock_end.tv_nsec);
                         exit(0);
                         break;
                     }
@@ -143,6 +143,8 @@ void main(void)
                         procs[i].rr_pri = 1;
                         num_arrived -= 1;
                         raise = (*run_sched)(procs, num_procs, last_exec, new_exec);
+						printf("%s %d\n", procs[i].name, procs[i].pid);
+						fflush(stdout);
                         last_exec = new_exec;
                         break;
                 }
