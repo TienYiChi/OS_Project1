@@ -69,11 +69,6 @@ void main(void)
     long long mte = te.tv_sec*1000LL + te.tv_usec/1000;
     long long ll_t_quantum = mte - mts;
     int t_sleep = (int)ll_t_quantum;
-    
-    struct timeval ts_main;
-    gettimeofday(&ts_main, NULL);
-    long long ll_t_current = ts_main.tv_sec*1000LL + ts_main.tv_usec/1000;
-    long long ll_t_start = ll_t_current;
 
     switch (policy[0])
     {
@@ -105,6 +100,11 @@ void main(void)
     int new_exec = 0;
 
     struct timespec clock_start, clock_end;
+
+    struct timeval ts_main;
+    gettimeofday(&ts_main, NULL);
+    long long ll_t_start = ts_main.tv_sec*1000LL + ts_main.tv_usec/1000;
+    long long ll_t_current = 0;
 
     do {
         gettimeofday(&ts_main, NULL);
